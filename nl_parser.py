@@ -1,17 +1,15 @@
 import re
 import json
 
-# ---------------------------------
 # Keywords
-# ---------------------------------
+
 ENTRY_KEYWORDS = ["buy", "enter", "trigger entry"]
 EXIT_KEYWORDS = ["sell", "exit", "close position"]
 
 VALID_FIELDS = ["open", "high", "low", "close", "volume", "price"]
 
-# ---------------------------------
 # Operator mapping
-# ---------------------------------
+
 OPERATOR_MAP = {
     "greater than or equal to": ">=",
     "less than or equal to": "<=",
@@ -30,9 +28,7 @@ OPERATOR_MAP = {
 
 SORTED_OPERATORS = sorted(OPERATOR_MAP.keys(), key=len, reverse=True)
 
-# ---------------------------------
 # Number words
-# ---------------------------------
 NUMBER_WORDS = {
     "one": "1", "two": "2", "three": "3", "four": "4", "five": "5",
     "six": "6", "seven": "7", "eight": "8", "nine": "9", "ten": "10",
@@ -47,9 +43,9 @@ def normalize_number_words(text):
         text = re.sub(rf"\b{w}\b", n, text, flags=re.IGNORECASE)
     return text
 
-# ---------------------------------
+
 # Number helpers
-# ---------------------------------
+
 def convert_suffix_numbers(t):
     """Convert 1m -> 1000000, 1k -> 1000"""
     t = str(t).strip().lower()
@@ -64,34 +60,31 @@ def convert_suffix_numbers(t):
 def clean_number_words(t):
     return str(t).replace(" million", "000000").replace(" thousand", "000")
 
-# ---------------------------------
 # Indicators
-# ---------------------------------
+
 def extract_indicator(expr):
     """Extract indicator patterns like RSI(14), SMA(20), 20-day moving average"""
     expr_lower = expr.lower().strip()
     expr_lower = re.sub(r"^the\s+", "", expr_lower)
 
-    # Pattern 1: RSI(14), SMA(20), EMA(50)
+    
     m = re.search(r"(rsi|sma|ema)\s*\(\s*(\d+)\s*\)", expr_lower)
     if m:
         return f"{m.group(1)}(close,{m.group(2)})"
 
-    # Pattern 2: 20-day moving average, 20 day moving average, 20 days moving average
     m = re.search(r"(\d+)[- ]*days?\s+moving\s+average", expr_lower)
     if m:
         return f"sma(close,{m.group(1)})"
     
-    # Pattern 3: moving average of 20 days
+    
     m = re.search(r"moving\s+average\s+of\s+(\d+)", expr_lower)
     if m:
         return f"sma(close,{m.group(1)})"
 
     return expr
 
-# ---------------------------------
+
 # Time normalization
-# ---------------------------------
 def normalize_time_price(expr):
     """
     Convert time-based expressions to shift() or min()/max() notation
@@ -99,22 +92,20 @@ def normalize_time_price(expr):
     """
     expr_clean = expr.lower().strip()
     
-    # Remove "the" prefix
+    
     expr_clean = re.sub(r"^the\s+", "", expr_clean)
 
-    # Pattern 1: yesterday/yesterdays + field
+
     m = re.search(r"yesterdays?\s+(open|high|low|close)", expr_clean)
     if m:
         return f"{m.group(1)}.shift(1)"
-
-    # Pattern 2: last N days high/low
     m = re.search(r"last\s+(\d+)\s+days?\s+(high|low)", expr_clean)
     if m:
         days, field = m.groups()
         fn = "max" if field == "high" else "min"
         return f"{fn}({field},{days})"
 
-    # Pattern 3: last N weeks high/low
+    
     m = re.search(r"last\s+(\d+)\s+weeks?\s+(high|low)", expr_clean)
     if m:
         weeks, field = m.groups()
@@ -122,30 +113,28 @@ def normalize_time_price(expr):
         fn = "max" if field == "high" else "min"
         return f"{fn}({field},{days})"
 
-    # Pattern 4: last week high/low (singular, assume 1 week)
     m = re.search(r"last\s+week\s+(high|low)", expr_clean)
     if m:
         field = m.group(1)
         fn = "max" if field == "high" else "min"
         return f"{fn}({field},5)"
 
-    # Pattern 5: field from N days ago
+   
     m = re.search(r"(open|high|low|close)\s+from\s+(\d+)\s+days?\s+ago", expr_clean)
     if m:
         field, days = m.groups()
         return f"{field}.shift({days})"
 
-    # Pattern 6: N days ago field
     m = re.search(r"(\d+)\s+days?\s+ago\s+(high|low|open|close)", expr_clean)
     if m:
         days, field = m.groups()
         return f"{field}.shift({days})"
 
-    return expr  # Return original if no match
+    return expr  
 
-# ---------------------------------
+
 # Normalize functions
-# ---------------------------------
+
 def normalize_left_side(raw):
     """Normalize the left side of conditions"""
     raw = raw.lower().strip()
@@ -166,10 +155,7 @@ def normalize_left_side(raw):
     return raw
 
 def normalize_right_side(raw):
-    """
-    Normalize the right side of conditions
-    Returns: Transformed value (indicator, shift, number, etc.)
-    """
+
     # Clean and normalize
     text = raw.strip().lower()
     
@@ -212,9 +198,9 @@ def normalize_right_side(raw):
     
     return text
 
-# ---------------------------------
+
 # Parsing helpers
-# ---------------------------------
+
 def protect_operators(text):
     """Replace operator phrases with tokens"""
     placeholders = {}
@@ -246,9 +232,8 @@ def restore_operator(text, placeholders):
     
     return None
 
-# ---------------------------------
+
 # MAIN PARSER
-# ---------------------------------
 def parse_natural_language(text):
     """Main parser - converts natural language to structured JSON"""
     result = {
@@ -270,7 +255,7 @@ def parse_natural_language(text):
         if not rule_type:
             continue
 
-        # Special case: Percent change patterns
+        
         pct = re.search(
             r"(\w+)\s+increases?\s+by\s+more\s+than\s+(\d+)\s*percent\s+compared\s+to\s+last\s+(\d+)\s+(days?|weeks?)",
             sentence
@@ -319,9 +304,8 @@ def parse_natural_language(text):
 
     return result
 
-# ---------------------------------
+# --------------------------------
 # TEST SUITE
-# ---------------------------------
 if __name__ == "__main__":
     tests = [
         "Buy when the close price is above the 20-day moving average and volume is above 1 million.",
