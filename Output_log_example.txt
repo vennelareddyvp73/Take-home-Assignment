@@ -1,69 +1,20 @@
-# Trading Strategy DSL System
+(venv) PS C:\Users\venne\Videos\Take-home-Assignment> python main.py
 
-A complete Natural Language to Code pipeline for algorithmic trading strategies with backtesting.
-
-## Overview
-
-This system converts plain English trading rules into executable Python code and runs backtests on historical market data.
-
-**Pipeline:** nl_parser.py → dsl_generator.py → dsl_parser.py →  python_code_generator.py → backtest.py → main.py
-
-## Installation
-
-### Requirements
-- Python 3.7+
-- pandas
-- lark
-
-### Setup
-```bash
-pip install pandas lark
-```
-
-## Quick Start
-
-Run the complete system:
-```bash
-python main.py
-```
-
-Enter a trading strategy in plain English when prompted, or press Enter to use the default example.
-
-
-
-## Complete Example Walkthrough
-
-This section shows the complete execution flow with actual output at each step.
-
-### Step 1: Natural Language Input
-
-**User Input:**
-```
-Buy when the close price is above the 20-day moving average and volume is above 1 million.
-```
-
-**System Output:**
-```
 ================================================================================
   STEP 1: Natural Language Input
 ================================================================================
 
-Input: Buy when the close price is above the 20-day moving average and volume is above 1 million.
-```
+Enter your trading strategy in plain English:
+(or press Enter for default)
+> Buy when the close price is above the 20-day moving average and volume is above 1 million.
 
----
+ Input: Buy when the close price is above the 20-day moving average and volume is above 1 million.
 
-### Step 2: Parse Natural Language to JSON
-
-The system converts your plain English into structured JSON format.
-
-**System Output:**
-```
 ================================================================================
   STEP 2: Parse Natural Language to JSON
 ================================================================================
 
-Parsed JSON Structure:
+ Parsed JSON Structure:
 {'entry': {'conditions': [{'left': 'close',
                            'operator': '>',
                            'right': 'sma(close,20)'},
@@ -72,50 +23,24 @@ Parsed JSON Structure:
                            'right': 1000000}],
            'operators': ['AND']},
  'exit': {'conditions': [], 'operators': []}}
-```
 
-
-- "close price above 20-day moving average" → `close > sma(close,20)`
-- "volume above 1 million" → `volume > 1000000`
-- "and" → `AND` operator connecting both conditions
-
----
-
-### Step 3: Generate DSL Text
-
-The JSON is converted into Domain-Specific Language (DSL) syntax.
-
-**System Output:**
-```
 ================================================================================
   STEP 3: Generate DSL Text
 ================================================================================
 
-Generated DSL:
+ Generated DSL:
 ENTRY:
     (close > sma(close,20) AND volume > 1000000)
 
 EXIT:
     (FALSE)
-```
 
 
-- Entry conditions combined with AND logic
-- No exit conditions specified, so EXIT is set to FALSE
-
----
-
-### Step 4: Parse DSL to AST
-
-The DSL is parsed into an Abstract Syntax Tree (AST) for code generation.
-
-**System Output:**
-```
 ================================================================================
   STEP 4: Parse DSL to AST
 ================================================================================
 
-Generated AST:
+ Generated AST:
 {'entry': [{'left': {'left': {'type': 'series', 'value': 'close'},
                      'op': '>',
                      'right': {'name': 'sma',
@@ -129,26 +54,12 @@ Generated AST:
                       'type': 'binary_op'},
             'type': 'binary_op'}],
  'exit': []}
-```
 
-
-- DSL converted to tree structure
-- Each component typed: series, indicator, number, binary_op
-- Ready for Python code generation
-
----
-
-### Step 5: Load Market Data
-
-Historical OHLCV data is loaded from CSV file.
-
-**System Output:**
-```
 ================================================================================
   STEP 5: Load Market Data
 ================================================================================
 
-Loaded 25 rows of OHLCV data
+ Loaded 25 rows of OHLCV data
 
 First 5 rows:
          date   open   high    low  close   volume
@@ -165,79 +76,43 @@ Last 5 rows:
 22  2023-01-23  116.0  118.0  114.0  117.0  1250000
 23  2023-01-24  117.0  120.0  116.0  119.0  1450000
 24  2023-01-25  119.0  122.0  118.0  121.0  1600000
-```
 
-- CSV file loaded successfully
-- 25 trading days of data (2023-01-01 to 2023-01-25)
-- Price range: $100 to $122
-
----
-
-### Step 6: Generate Trading Strategy
-
-The AST is converted to executable Python code and signals are generated.
-
-**System Output:**
-```
 ================================================================================
   STEP 6: Generate Trading Strategy
 ================================================================================
 
-Strategy generated successfully!
+ Strategy generated successfully!
 
-Signal Summary:
+ Signal Summary:
   Total Entry Signals:  6
   Total Exit Signals:   0
 
-Sample Signals (first 5):
+ Sample Signals (first 5):
   2023-01-20: ENTRY
   2023-01-21: ENTRY
   2023-01-22: ENTRY
   2023-01-23: ENTRY
   2023-01-24: ENTRY
-```
 
-- Python code generated from AST
-- Strategy evaluated on all 25 data points
-- 6 entry signals identified where conditions were met
-- No exit signals (no exit rules specified)
-
----
-
-### Step 7: Execute Backtest
-
-Trading simulation runs using the generated signals.
-
-**System Output:**
-```
 ================================================================================
   STEP 7: Execute Backtest
 ================================================================================
 
 Backtest completed!
-```
 
----
-
-### Step 8: Backtest Results
-
-Complete performance report with trade history and metrics.
-
-**System Output:**
-```
 ================================================================================
   STEP 8: Backtest Results
 ================================================================================
 
 ================================================================================
-TRADE HISTORY
+ TRADE HISTORY
 ================================================================================
 
 Total Trades: 1
 
 --------------------------------------------------------------------------------
 
-Trade #1:
+✅ Trade #1:
   Entry Date:       2023-01-20
   Exit Date:        2023-01-25
   Entry Price:      $119.00
@@ -247,10 +122,10 @@ Trade #1:
 --------------------------------------------------------------------------------
 
 ================================================================================
-BACKTEST RESULTS SUMMARY
+ BACKTEST RESULTS SUMMARY
 ================================================================================
 
-Portfolio Performance:
+ Portfolio Performance:
   Initial Capital:        $100,000.00
   Final Capital:          $101,477.51
   Total Return:           1.48%
@@ -260,41 +135,17 @@ Portfolio Performance:
 ================================================================================
 
 ================================================================================
-EXECUTION SUMMARY
+ EXECUTION SUMMARY
 ================================================================================
 
-Natural Language: Buy when the close price is above the 20-day moving average and volume is above 1 million.
-DSL Generated: Success
-AST Parsed: Success
-Strategy Executed: Success
-Backtest Completed: Success
+ Natural Language: Buy when the close price is above the 20-day moving average and volume is above 1 million.
+ DSL Generated: Success
+ AST Parsed: Success
+ Strategy Executed: Success
+ Backtest Completed: Success
 
-Final Results:
+ Final Results:
    Total Return:        1.48%
    Max Drawdown:       -2.62%
    Number of Trades:       1
-```
-
-
-- System entered trade on 2023-01-20 at $119.00
-- Trade remained open until end of data (2023-01-25) at $121.00
-- Made $1,577.41 profit (1.68% return on position, 1.48% total portfolio return)
-- Maximum drawdown was -2.62% during the holding period
-
----
-
-## Project Structure
-
-```
-├── main.py                   # End-to-end pipeline
-├── nl_parser.py              # Natural language to JSON
-├── dsl_generator.py          # JSON to DSL text
-├── dsl_parser.py             # DSL to AST
-├── python_code_generator.py  # AST to Python code
-├── backtest.py               # Trading simulator
-├── ohlcv.csv                 # Sample market data
-├── README.md                 # This file
-└── DSL_SPECIFICATION.md      # Grammar documentation
-```
-
----
+(venv) PS C:\Users\venne\Videos\Take-home-Assignment> 
