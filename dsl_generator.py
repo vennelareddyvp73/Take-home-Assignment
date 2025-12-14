@@ -1,6 +1,3 @@
-"""
-Enhanced DSL Generator - Fixed to handle shift() notation
-"""
 
 import re
 from typing import Dict, List, Tuple
